@@ -1,11 +1,13 @@
 import gab.opencv.*;
 import java.io.*;
 
+PrintWriter output;
+
 final int WIDTH =640;//幅の設定
 final int HEIGHT =480;//縦の設定
 final int Number=45;//画像の枚数の設定
 
-float r,g,b;
+float r,g,b,h,s;
 PImage Img[] = new PImage[45];
 int[] ImgNum = new int[45];
 int[] myPhotoWidth = new int[45];
@@ -19,6 +21,7 @@ size(WIDTH,HEIGHT);
 Imagepics = new PImage[Number];
 }
 void setup(){
+  output =createWriter("color.txt");
   for(int i = 0,j=1; i<Number; i++,j++){
     String str = setImageName(i, j);
    
@@ -65,44 +68,51 @@ void getColor(){
   int greenCount = 0;
 
   for(int i=0; i<Number; i++){
+    output.println("pic"+str(i+1));
     loadPixels();
     //画像の縦横のピクセル値の読み取り
     for(int y=0; y<myPhotoHeight[i]; y++){
       for(int x=0; x<myPhotoWidth[i]; x++){
            int loc  = x+y*myPhotoWidth[i];
       
-       r= red(Img[i].pixels[loc]);
-       g= green(Img[i].pixels[loc]);
-       b= blue(Img[i].pixels[loc]);
- 
+       h= hue(Img[i].pixels[loc]);
+       s= saturation(Img[i].pixels[loc]);
+       b= brightness(Img[i].pixels[loc]);
+  
  //色の閾値の設定
-         if(r>=135  && g<75 && b<75){
+   
+    if(s!=0){
+    if(h !=0){
+         if(h>0 && h<60){
            redCount += 1;
-         }else if(r<75 && b >= 135 && g<75 ){
+         }else if(h>=60 && h<130 ){
+           greenCount +=1;
+         } else {
            blueCount += 1;
-         } else if (r<75 && b < 75 && g>=135 ){
-           greenCount += 1;
          }
         }
+      }
+      }
+      
       }
       updatePixels();
       
       //色の出力結果
-      try{
-      System.setOut(new PrintStream(new FileOutputStream("color.txt")));
-      if(redCount>blueCount){
-          System.out.println("this is red");
-        }else if(blueCount>greenCount){
-          System.out.println("this is blue");
+       //処理結果をファイルへ出力
+      if(redCount>blueCount  && redCount>greenCount ){
+          System.out.println("This is RED");
+          output.print("This is RED");
+        }else if(blueCount>greenCount && blueCount>redCount ){
+          System.out.println("This is BLUE");
+          output.print("This is BLUE");
         }else {
-          System.out.println("this is green");
+          System.out.println("This is GREEN");
+           output.print("This is GREEN");
     }
-      }catch(Exception e){
-        e.printStackTrace();
-      }
-    
+   
+    output.println("");
   }
-  //処理結果をファイルへ出力
-  
+  output.flush();
+  output.close();
   
 }
