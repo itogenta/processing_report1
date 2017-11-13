@@ -1,105 +1,108 @@
-//final int WIDTH =640;
-//final int HEIGHT =480;
-//final int Number=45;
-//int loc;
-PImage img;
+import gab.opencv.*;
+import java.io.*;
+
+final int WIDTH =640;//幅の設定
+final int HEIGHT =480;//縦の設定
+final int Number=45;//画像の枚数の設定
+
 float r,g,b;
-//float r,g,b;
-//PImage pic[];
+PImage Img[] = new PImage[45];
+int[] ImgNum = new int[45];
+int[] myPhotoWidth = new int[45];
+int[] myPhotoHeight = new int[45];
+PImage Imagepics[] = new PImage[45];
 
-
-/*void Color (){
-  int ImageArray[]= new int[Number];
-}*/
-
-
-//displaysetting
-//void settings(){
+//画面の設定
+void settings(){
   
-//  //size(WIDTH,HEIGHT);
-//  //pic = new PImage[Number];
-//  img = loadImage("pic01.jpg");
-//}
+size(WIDTH,HEIGHT);
+Imagepics = new PImage[Number];
+}
 void setup(){
- size(640,360);
- ////photoread
- //  for(int i = 0,j=1; i<Number; i++,j++){
- //   String str;
- //   if(i<9){
- //     str = "data/pic0" + j + ".jpg";
- //   } else{
- //      str = "data/pic" + j + ".jpg";
- //   }
- //   pic[i] = loadImage(str,"jpg");
- //  }
-   img = loadImage("pic12.jpg");
-  // image(img,img.width/2,img.height/2);
-   getColor();
+  for(int i = 0,j=1; i<Number; i++,j++){
+    String str = setImageName(i, j);
    
-   
+    Img[i] = loadImage(str);
+    myPhotoWidth[i] = Img[i].width; //画像サイズ（幅）を取得
+    myPhotoHeight[i] = Img[i].height; //画像サイズ（高さ）を取得
+    ImgNum[i] = i;
+    
+    Imagepics[i] = loadImage(str); 
+  }
+    
+    //画像を７＊７で出力するためのもの
+    for(int i = 0, x=0, y=0; i<Number; i++,x++){
+      if(i!=0 && i % 7 ==0){
+        y++;
+        x=0;
+      }
+      image(Imagepics[i],x*WIDTH/7,y*HEIGHT/7,WIDTH/7,HEIGHT/7);
+  }
+  getColor();
+}
+  //画像の出力
+String setImageName(int i, int j){
+  String str;
+  //pic01.jpg~pic09.jpg
+   if(i<9){
+      str = "data/pic0" +str(j) + ".jpg";
+   //pic10.jpg~pic45.jpg
+    } else{
+       str = "data/pic" + str(j) + ".jpg";
+    }
+  return str;
 }
 
-//photoup
+//出力
 void draw(){
-     image(img,img.width/2,img.height/2);
-
-  //for(int i = 0, x=0, y=0; i<Number; i++,x++){
-  //    if(i!=0 && i % 7 ==0){
-  //      y++;
-  //      x=0;
-  //    }
-  //    image(pic[i],x*WIDTH/7,y*HEIGHT/7,WIDTH/7,HEIGHT/7);
-  //  }
 }
-//colorread
-void getColor(){
 
-   loadPixels();
-   
-//  //for(int index = 0,img;)
+//色を抽出する関数
+void getColor(){
+  //赤、青、緑のカウント
   int redCount = 0;
   int blueCount = 0;
   int greenCount = 0;
-  for(int y=0; y<img.height; y++){
-     for(int x=0; x<img.width; x++){
-        int loc  = x+y*img.width;
-        
-        
-       
-//      //color new_color = color(red(loc),255-green(loc),255-blue(loc));
-//      //set(i,j);
-      //pixels rgb
-      r= red(img.pixels[loc]);
-      g= green(img.pixels[loc]);
-      b= blue(img.pixels[loc]);
+
+  for(int i=0; i<Number; i++){
+    loadPixels();
+    //画像の縦横のピクセル値の読み取り
+    for(int y=0; y<myPhotoHeight[i]; y++){
+      for(int x=0; x<myPhotoWidth[i]; x++){
+           int loc  = x+y*myPhotoWidth[i];
       
-      //if(r != 255 && g != 255 && b != 255){
-      //  println(r,g,b);
-      //}
-        if(r>=130 && g<100 && b<100){
-            redCount += 1;
-           // println(redCount);
-        
-        }else if(r<100 && b >= 130 && g<100 ){
-          blueCount += 1;
-          //println(blueCount);
-        } else if (r<100 && b < 100 && g>=130 ){
-          greenCount += 1;
-         // println(greenCount);
-        }
-       
-//    }
-//  }
-    
-     updatePixels();
-  }
- }
+       r= red(Img[i].pixels[loc]);
+       g= green(Img[i].pixels[loc]);
+       b= blue(Img[i].pixels[loc]);
  
-        if(redCount>blueCount){
-          println("this is red");
-        }else if(blueCount>greenCount){
-          println("this is blue");
-        }else {
-          println("this is green");
+ //色の閾値の設定
+         if(r>=135  && g<75 && b<75){
+           redCount += 1;
+         }else if(r<75 && b >= 135 && g<75 ){
+           blueCount += 1;
+         } else if (r<75 && b < 75 && g>=135 ){
+           greenCount += 1;
+         }
         }
+      }
+      updatePixels();
+      
+      //色の出力結果
+      try{
+      System.setOut(new PrintStream(new FileOutputStream("color.txt")));
+      if(redCount>blueCount){
+          System.out.println("this is red");
+        }else if(blueCount>greenCount){
+          System.out.println("this is blue");
+        }else {
+          System.out.println("this is green");
+    }
+      }catch(Exception e){
+        e.printStackTrace();
+      }
+    
+  }
+  //処理結果をファイルへ出力
+  
+  
 }
